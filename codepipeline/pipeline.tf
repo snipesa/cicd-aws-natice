@@ -30,6 +30,7 @@ resource "aws_iam_policy" "policy-pipeline" {
                 "codecommit:GetBranch",
                 "codecommit:GetCommit",
                 "codecommit:GetRepository",
+		"codecommit:GitPull",
                 "codecommit:GetUploadArchiveStatus",
                 "codecommit:UploadArchive"
             ],

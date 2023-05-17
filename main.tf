@@ -46,6 +46,7 @@ module "build-project" {
   region = "${local.region}"
   account-id = "${local.account}"
   res-name = "${local.res-name}"
+  build-source-location = "https://git-codecommit.${local.region}.amazonaws.com/v1/repos/${local.res-name}"
 }
 
 module "code-pipeline" {

@@ -114,7 +114,7 @@ resource "aws_codebuild_project" "build-project" {
 
   source {
     type            = "CODECOMMIT"
-    location = "web-app"
+    location = var.build-source-location
     }
   }
    

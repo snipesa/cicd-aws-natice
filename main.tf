@@ -1,15 +1,10 @@
 
-
 locals {
   region = "us-west-1"
-  account = "xxxxxxxxxxxxx"
+  account = "454812042799"
   res-name = "web-app"
 }
 
-resource "aws_codecommit_repository" "repo_1" {
-  repository_name = "${local.res-name}"
-  description     = "This is the private app Repository"
-}
 
 module "ecr" {
   source  = "terraform-aws-modules/ecr/aws"
@@ -40,18 +35,17 @@ module "ecr" {
   }
 }
 
-module "build-project" {
+module "build-pipeline" {
   source = "./codebuild"
+
+  codecommit-rep = "${local.res-name}"
+
   codebuild-project = "${local.res-name}"
   region = "${local.region}"
   account-id = "${local.account}"
   res-name = "${local.res-name}"
   build-source-location = "https://git-codecommit.${local.region}.amazonaws.com/v1/repos/${local.res-name}"
+
+  
+  code-pipeline = "${local.res-name}"
 }
-
-module "code-pipeline" {
-  source = "./codepipeline"
-  pipeline = "${local.res-name}"
-}
-
-

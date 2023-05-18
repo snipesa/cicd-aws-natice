@@ -30,8 +30,8 @@ resource "aws_iam_policy" "policy-pipeline" {
                 "codecommit:GetBranch",
                 "codecommit:GetCommit",
                 "codecommit:GetRepository",
-		"codecommit:GitPull",
                 "codecommit:GetUploadArchiveStatus",
+                "codecommit:GitPull",
                 "codecommit:UploadArchive"
             ],
             "Resource": "*",
@@ -200,7 +200,10 @@ resource "aws_iam_role" "role-pipeline" {
     ]
   })
 
-  managed_policy_arns = [aws_iam_policy.policy-pipeline.arn]
+  managed_policy_arns = [
+    aws_iam_policy.policy-pipeline.arn,
+    aws_iam_policy.policy-cb.arn
+  ]
 
 }
 
@@ -209,7 +212,7 @@ resource "aws_s3_bucket" "codepipeline_bucket" {
 }
 
 resource "aws_codepipeline" "code-pipeline" {
-  name     = var.pipeline
+  name     = var.code-pipeline
   role_arn = aws_iam_role.role-pipeline.arn
 
   artifact_store {
@@ -228,7 +231,7 @@ resource "aws_codepipeline" "code-pipeline" {
       provider         = "CodeCommit"
       run_order = 1
       version          = "1"
-      output_artifacts = ["source-web-app"]
+      output_artifacts = ["web-app"]
       input_artifacts = []
       configuration = {
         RepositoryName = var.codecommit-rep
@@ -247,8 +250,8 @@ resource "aws_codepipeline" "code-pipeline" {
       owner            = "AWS"
       provider         = "CodeBuild"
       version          = "1"
-      input_artifacts = ["source-web-app"]
-      output_artifacts = ["pipeline-build-artiffact"]
+      input_artifacts = ["web-app"]
+      output_artifacts = ["pipeline-build-artifact"]
 
       run_order = 1
       configuration = {

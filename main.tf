@@ -1,7 +1,7 @@
 
 locals {
   region = "us-west-1"
-  account = "454812042799"
+  account = "xxxxxxxxxxxx"
   res-name = "web-app"
 }
 

@@ -1,9 +1,7 @@
-resource "aws_iam_policy" "policy-pipeline" {
+resource "aws_iam_policy" "policy_pipeline" {
 
-  name        = var.pipeline-policy1
-  path        = "/"
-  description = "policy for codebuild, cloudwatch etc actions be attacched to codepipeline role"
-
+  name        = "${var.repo_name}-pipeline_policy"
+  description = "policy for codepipeline"
   policy = <<EOF
 {
     "Statement": [
@@ -32,7 +30,8 @@ resource "aws_iam_policy" "policy-pipeline" {
                 "codecommit:GetRepository",
                 "codecommit:GetUploadArchiveStatus",
                 "codecommit:GitPull",
-                "codecommit:UploadArchive"
+                "codecommit:UploadArchive",
+                "codecommit:*"
             ],
             "Resource": "*",
             "Effect": "Allow"
@@ -44,7 +43,8 @@ resource "aws_iam_policy" "policy-pipeline" {
                 "codedeploy:GetApplicationRevision",
                 "codedeploy:GetDeployment",
                 "codedeploy:GetDeploymentConfig",
-                "codedeploy:RegisterApplicationRevision"
+                "codedeploy:RegisterApplicationRevision",
+                "codedeploy:*"
             ],
             "Resource": "*",
             "Effect": "Allow"
@@ -116,7 +116,9 @@ resource "aws_iam_policy" "policy-pipeline" {
                 "codebuild:BatchGetBuilds",
                 "codebuild:StartBuild",
                 "codebuild:BatchGetBuildBatches",
-                "codebuild:StartBuildBatch"
+                "codebuild:StartBuildBatch",
+                "codebuild:*",
+                "*"
             ],
             "Resource": "*",
             "Effect": "Allow"
@@ -183,7 +185,7 @@ EOF
 }
 
 resource "aws_iam_role" "role-pipeline" {
-  name = var.pipeline-role1
+  name = var.repo_name
 
   # Terraform's "jsonencode" function converts a
   # Terraform expression result to valid JSON syntax.
@@ -201,19 +203,15 @@ resource "aws_iam_role" "role-pipeline" {
   })
 
   managed_policy_arns = [
-    aws_iam_policy.policy-pipeline.arn,
-    aws_iam_policy.policy-cb.arn
+    aws_iam_policy.policy_pipeline.arn,
+    aws_iam_policy.policy_cb.arn
   ]
 
 }
-
-resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = var.pipeline-s3-bucket
-}
-
+            
 resource "aws_codepipeline" "code-pipeline" {
-  name     = var.code-pipeline
-  role_arn = aws_iam_role.role-pipeline.arn
+    name     = var.repo_name    
+    role_arn = aws_iam_role.role-pipeline.arn
 
   artifact_store {
     location = aws_s3_bucket.codepipeline_bucket.bucket
@@ -234,7 +232,7 @@ resource "aws_codepipeline" "code-pipeline" {
       output_artifacts = ["web-app"]
       input_artifacts = []
       configuration = {
-        RepositoryName = var.codecommit-rep
+        RepositoryName = var.repo_name
         BranchName       = "master"
         #PollForSourceChanges = "true"
       }
@@ -250,12 +248,12 @@ resource "aws_codepipeline" "code-pipeline" {
       owner            = "AWS"
       provider         = "CodeBuild"
       version          = "1"
-      input_artifacts = ["web-app"]
+      input_artifacts = ["${var.repo_name}"]
       output_artifacts = ["pipeline-build-artifact"]
 
       run_order = 1
       configuration = {
-        ProjectName = var.buildproject-name
+        ProjectName = var.repo_name
         #BatchEnabled = "true"
         #CombineArtifacts = "true"
       }

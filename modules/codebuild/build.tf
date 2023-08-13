@@ -1,9 +1,9 @@
 
-resource "aws_iam_policy" "policy-cb" {
+resource "aws_iam_policy" "policy_cb" {
 
-  name        = var.codebuild-policy1
+  name        = "${var.repo_name}-policy"
   path        = "/"
-  description = "policy for logs, s3, ecr, codecommit, and codebuild actions be attacched to codebuild role"
+  description = "codebuild policy for ${var.repo_name}"
 
   policy = <<EOF
 {
@@ -12,8 +12,8 @@ resource "aws_iam_policy" "policy-cb" {
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:logs:${var.region}:${var.account-id}:log-group:/aws/codebuild/${var.res-name}",
-                "arn:aws:logs:${var.region}:${var.account-id}:log-group:/aws/codebuild/${var.res-name}:*"
+                "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/codebuild/${var.repo_name}",
+                "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/codebuild/${var.repo_name}:*"
             ],
             "Action": [
                 "logs:CreateLogGroup",
@@ -46,7 +46,7 @@ resource "aws_iam_policy" "policy-cb" {
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:codecommit:${var.region}:${var.account-id}:${var.res-name}"
+                "arn:aws:codecommit:${var.region}:${data.aws_caller_identity.current.account_id}:${var.repo_name}"
             ],
             "Action": [
                 "codecommit:GitPull"
@@ -62,7 +62,7 @@ resource "aws_iam_policy" "policy-cb" {
                 "codebuild:BatchPutCodeCoverages"
             ],
             "Resource": [
-                "arn:aws:codebuild:${var.region}:${var.account-id}:report-group/${var.res-name}-*"
+                "arn:aws:codebuild:${var.region}:${data.aws_caller_identity.current.account_id}:report-group/${var.repo_name}-*"
             ]
         }
     ]
@@ -71,7 +71,7 @@ EOF
 }
 
 resource "aws_iam_role" "role-code-build" {
-  name = var.codebuild-role
+  name = "${var.repo_name}-codebuild_role"
 
   # Terraform's "jsonencode" function converts a
   # Terraform expression result to valid JSON syntax.
@@ -88,12 +88,12 @@ resource "aws_iam_role" "role-code-build" {
     ]
   })
 
-  managed_policy_arns = [aws_iam_policy.policy-cb.arn]
+  managed_policy_arns = [aws_iam_policy.policy_cb.arn]
 
 }
 
 resource "aws_codebuild_project" "build-project" {
-  name          = var.codebuild-project
+  name          = var.repo_name
   description   = "test_codebuild_project"
   build_timeout = "10"
   service_role  = aws_iam_role.role-code-build.arn
@@ -114,7 +114,7 @@ resource "aws_codebuild_project" "build-project" {
 
   source {
     type            = "CODECOMMIT"
-    location = var.build-source-location
+    location = aws_codecommit_repository.repo_1.clone_url_http
     }
   }
    

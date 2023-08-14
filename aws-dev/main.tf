@@ -1,5 +1,5 @@
 module "_codebuild_cicd" {
-  source = "github.com/snipesa/cicd-aws-natice/tree/main/modules/codebuild"
+  source = "github.com/snipesa/cicd-aws-natice/modules/codebuild"
 
   repo_name = "web-app"
 

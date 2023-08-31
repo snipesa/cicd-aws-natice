@@ -39,4 +39,9 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_codecommit-arn"></a> [codecommit-arn](#output\_codecommit-arn) | n/a |
+| <a name="output_ecr-arn"></a> [ecr-arn](#output\_ecr-arn) | n/a |
+| <a name="output_pipeline-arn"></a> [pipeline-arn](#output\_pipeline-arn) | n/a |
+| <a name="output_s3-arn"></a> [s3-arn](#output\_s3-arn) | n/a |
